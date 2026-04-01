@@ -1,6 +1,9 @@
 
 local gui = {}
 
+local f = "core/gui/"
+gui.bouton = require(f.."bouton")
+
 function gui.load()
 end
 --
