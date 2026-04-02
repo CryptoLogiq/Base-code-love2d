@@ -49,8 +49,23 @@ local function draw(self)
   love.graphics.rectangle("fill", self.x, self.y, self.w, self.h, self.rounded)
   --
   local txt = self.text
-  love.graphics.setColor(txt.color)
+  if self.selected then
+    love.graphics.setColor(txt.colorSelect)
+  else
+    love.graphics.setColor(txt.color)
+  end
   love.graphics.draw(txt.data, txt.x, txt.y)
+  --
+  love.graphics.setColor(1,1,1,1)
+end
+--
+
+local function isSelect(self)
+  if self.group then
+    self.group:isSelect(self.group)
+  else
+    self.selected = true
+  end
 end
 --
 
@@ -72,12 +87,12 @@ end
 
 function button.new(text, x, y, w, h, group, fct)
 
-  local new = {textString=text, x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, load=load, update=update, draw=draw, getGroup=getGroup, setFunction=setFunction, setFont=setFont, setText=setText}
+  local new = {textString=text, x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, selected=false, isSelect=isSelect,  load=load, update=update, draw=draw, getGroup=getGroup, setFunction=setFunction, setFont=setFont, setText=setText}
   new.cx = new.w/2
   new.cy = new.h/2
   --
   local  usedFont = love.graphics.getFont()
-  new.text = {data=love.graphics.newText(usedFont, new.textString),  x=0, y=0, w=0, h=0, ox=0, oy=0, color={0,0,0,1}, colorDefaut={0,0,0,1}}
+  new.text = {data=love.graphics.newText(usedFont, new.textString),  x=0, y=0, w=0, h=0, ox=0, oy=0, color={0,0,0,1}, colorSelect={0,1,0,1}, colorDefaut={0,0,0,1}}
   new.text.w,new.text.h = new.text.data:getDimensions()
   --
   if not fct then
@@ -133,6 +148,7 @@ local function groupMousepressed(group, x,y,button,istouch,presses)
   for n=1, #group do
     local bt = group[n]
     if x >= bt.x and y >= bt.y and x <= bt.x + bt.w and y <= bt.y + bt.h then
+      bt:isSelect()
       bt:fct()
       break
     end
@@ -147,8 +163,20 @@ local function groupKeypressed(group, k,s,isrepeat)
 end
 --
 
+local function groupIsSelect(button, group)
+  for n=1, #group do
+    local bt = group[n]
+    if bt ~= button then
+      bt.selected = false
+    else
+      bt.selected = true
+    end
+  end
+end
+--
+
 function button.newGroup(name)
-  button.lst_group[name] = {load=groupLoad, update=groupUpdate, draw=groupDraw, mousepressed=groupMousepressed, keypressed=groupKeypressed}
+  button.lst_group[name] = {load=groupLoad, update=groupUpdate, draw=groupDraw, mousepressed=groupMousepressed, keypressed=groupKeypressed, isSelect=groupIsSelect}
   return button.lst_group[name]
 end
 --

@@ -53,7 +53,7 @@ function scene.draw()
       love.graphics.print("Scene current running is : "..current.name,10,10)
     end
   else
-    love.graphics.print("Oups, no Scene is currently running, you need to create a scene",10,10)
+    love.graphics.print("Oops, no Scene is currently running, you need to create a scene",10,10)
   end
 end
 --
