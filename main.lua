@@ -1,8 +1,6 @@
 -- Core
 require("init")
 
-print(love.getVersion( ))
-
 function love.load()
   Scene.load()
 end

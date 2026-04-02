@@ -3,10 +3,11 @@ local menu = Scene.new("Menu")
 
 --
 local nav = {}
-nav.group = Gui.bouton.newGroup("Menu")
+nav.group = Gui.button.newGroup("Menu")
 print("nav.group : ", nav.group)
-nav.main = Gui.bouton.new("Play", 150, 200, 500, 50, "Menu")
-nav.quit = Gui.bouton.new("Quit", 150, 500, 500, 50, "Menu")
+nav.main = Gui.button.new("Play", 150, 200, 500, 50, "Menu")
+nav.quit = Gui.button.new("Quit", 150, 500, 500, 50, "Menu", function(self) love.event.quit() end)
+--
 
 --
 menu.current = nav.main

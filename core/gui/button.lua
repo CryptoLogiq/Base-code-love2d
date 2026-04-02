@@ -1,5 +1,5 @@
 
-local bouton = {lst_group={}}
+local button = {lst_group={}}
 
 local function load(self)
 end
@@ -12,6 +12,21 @@ end
 
 local function setFunction(self, fct)
   self.fct = fct
+end
+--
+
+local function setFont(self, font)
+  self.font = font
+  self.text.data=love.graphics.newText(font, self.textString)
+  self.text.w, self.text.h = self.text.data:getDimensions()
+end
+--
+
+
+local function setText(self, text, font)
+  self.textString = text
+  self.text.data=love.graphics.newText(font or self.font, self.textString)
+  self.text.w, self.text.h = self.text.data:getDimensions()
 end
 --
 
@@ -53,29 +68,35 @@ local function keypressed(self)
 end
 --
 
---## Boutons ## :
+--## buttons ## :
 
-function bouton.new(text, x, y, w, h, group, font)
-  local usedFont = font
-  if not font then
-    usedFont = love.graphics.getFont()
-  end
-  --
-  local new = {textString=text, x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, load=load, update=update, draw=draw, getGroup=getGroup}
+function button.new(text, x, y, w, h, group, fct)
+
+  local new = {textString=text, x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, load=load, update=update, draw=draw, getGroup=getGroup, setFunction=setFunction, setFont=setFont, setText=setText}
   new.cx = new.w/2
   new.cy = new.h/2
   --
+  local  usedFont = love.graphics.getFont()
   new.text = {data=love.graphics.newText(usedFont, new.textString),  x=0, y=0, w=0, h=0, ox=0, oy=0, color={0,0,0,1}, colorDefaut={0,0,0,1}}
   new.text.w,new.text.h = new.text.data:getDimensions()
   --
-  new.fct = function(self) return print(new.textString, "function not exit") end
+  if not fct then
+    new.fct = function(self) return print("button "..new.textString, "function not exit, use   button:setFunction( function(self) 'core function' end)") end
+  else
+    if type(fct) == "function" then
+      new.fct = fct
+    else
+      new.fct = function(self) print("\n".."button "..new.textString, "bads arguments to create function for button, use :  function(self) 'core function' end".."\n".."follow this example :".."\n"..'quit = Gui.button.new("Quit", 150, 500, 500, 50, "Menu", function(self) love.event.quit() end)'.."\n") end
+      new.fct()
+    end
+  end
   --
   if group then
     if type(group) == "table" then
       new.group = group
 
     elseif type(group) == "string" then
-      new.group = bouton.addGroupName(group, new)
+      new.group = button.addGroupName(group, new)
     end
   end
   return new
@@ -126,30 +147,30 @@ local function groupKeypressed(group, k,s,isrepeat)
 end
 --
 
-function bouton.newGroup(name)
-  bouton.lst_group[name] = {load=groupLoad, update=groupUpdate, draw=groupDraw, mousepressed=groupMousepressed, keypressed=groupKeypressed}
-  return bouton.lst_group[name]
+function button.newGroup(name)
+  button.lst_group[name] = {load=groupLoad, update=groupUpdate, draw=groupDraw, mousepressed=groupMousepressed, keypressed=groupKeypressed}
+  return button.lst_group[name]
 end
 --
 
-function bouton.addGroupName(groupName, bt)
+function button.addGroupName(groupName, bt)
   local groupExist = false
   local gr = nil
   --
-  if not bouton.lst_group.groupName then
+  if not button.lst_group.groupName then
 
     if type(groupName) == "string" then
 
-      if bouton.lst_group[groupName] then
-        gr = bouton.lst_group[groupName]
+      if button.lst_group[groupName] then
+        gr = button.lst_group[groupName]
       else
-        gr = bouton.newGroup(groupName)
+        gr = button.newGroup(groupName)
       end
       groupExist = true
 
     elseif type(groupName) == "table" then
 
-      for index, groups in pairs(bouton.lst_group) do
+      for index, groups in pairs(button.lst_group) do
         if groupName == groups then
           gr = groups
           groupExist = true
@@ -163,7 +184,7 @@ function bouton.addGroupName(groupName, bt)
   --
   if not groupExist then
     print('bad argument with', groupName)
-    print('You need create a group with "text variable" OR "group table" use before : bouton.newGroup(name)')
+    print('You need create a group with "text variable" OR "group table" use before : button.newGroup(name)')
     return nil
   end
   --
@@ -175,4 +196,4 @@ function bouton.addGroupName(groupName, bt)
 end
 --
 
-return bouton
+return button
