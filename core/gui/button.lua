@@ -1,12 +1,12 @@
 
-local button = {lst_group={}}
+local button = {lst_group={}, debug=true}
 
 local function load(self)
 end
 --
 
 local function getGroup(self)
-  return self.group
+  return self.group or false
 end
 --
 
@@ -17,15 +17,15 @@ end
 
 local function setFont(self, font)
   self.font = font
-  self.text.data=love.graphics.newText(font, self.textString)
+  self.text.data=love.graphics.newText(font, self.name)
   self.text.w, self.text.h = self.text.data:getDimensions()
 end
 --
 
 
 local function setText(self, text, font)
-  self.textString = text
-  self.text.data=love.graphics.newText(font or self.font, self.textString)
+  self.name = text
+  self.text.data=love.graphics.newText(font or self.font, self.name)
   self.text.w, self.text.h = self.text.data:getDimensions()
 end
 --
@@ -41,6 +41,13 @@ local function update(self, dt)
   txt.oy = txt.h/2
   txt.x = self.cx - txt.ox
   txt.y = self.cy - txt.oy
+
+  -- Mouse on button ? if yes selected this button :
+  if Mouse.x >= self.x and Mouse.y >= self.y and Mouse.x <= self.x + self.w and Mouse.y <= self.y + self.h then
+    self:isSelect(self)
+  else
+    self.selected = false
+  end
 end
 --
 
@@ -62,7 +69,7 @@ end
 
 local function isSelect(self)
   if self.group then
-    self.group:isSelect(self.group)
+    self.group.isSelect(self, self.group)
   else
     self.selected = true
   end
@@ -87,21 +94,21 @@ end
 
 function button.new(text, x, y, w, h, group, fct)
 
-  local new = {textString=text, x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, selected=false, isSelect=isSelect,  load=load, update=update, draw=draw, getGroup=getGroup, setFunction=setFunction, setFont=setFont, setText=setText}
+  local new = {name=text, x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, selected=false, isSelect=isSelect,  load=load, update=update, draw=draw, getGroup=getGroup, setFunction=setFunction, setFont=setFont, setText=setText}
   new.cx = new.w/2
   new.cy = new.h/2
   --
   local  usedFont = love.graphics.getFont()
-  new.text = {data=love.graphics.newText(usedFont, new.textString),  x=0, y=0, w=0, h=0, ox=0, oy=0, color={0,0,0,1}, colorSelect={0,1,0,1}, colorDefaut={0,0,0,1}}
+  new.text = {data=love.graphics.newText(usedFont, new.name),  x=0, y=0, w=0, h=0, ox=0, oy=0, color={0,0,0,1}, colorSelect={0,1,0,1}, colorDefaut={0,0,0,1}}
   new.text.w,new.text.h = new.text.data:getDimensions()
   --
   if not fct then
-    new.fct = function(self) return print("button "..new.textString, "function not exit, use   button:setFunction( function(self) 'core function' end)") end
+    new.fct = function(self) return print("button "..new.name, "function not exit, use   button:setFunction( function(self) 'core function' end)") end
   else
     if type(fct) == "function" then
       new.fct = fct
     else
-      new.fct = function(self) print("\n".."button "..new.textString, "bads arguments to create function for button, use :  function(self) 'core function' end".."\n".."follow this example :".."\n"..'quit = Gui.button.new("Quit", 150, 500, 500, 50, "Menu", function(self) love.event.quit() end)'.."\n") end
+      new.fct = function(self) print("\n".."button "..new.name, "bads arguments to create function for button, use :  function(self) 'core function' end".."\n".."follow this example :".."\n"..'quit = Gui.button.new("Quit", 150, 500, 500, 50, "Menu", function(self) love.event.quit() end)'.."\n") end
       new.fct()
     end
   end
@@ -113,7 +120,10 @@ function button.new(text, x, y, w, h, group, fct)
     elseif type(group) == "string" then
       new.group = button.addGroupName(group, new)
     end
+  else
+    new.group = button.ungrouped
   end
+  --
   return new
 end
 --
@@ -129,10 +139,17 @@ end
 --
 
 local function groupUpdate(group, dt)
+  local current_bt = false
   for n=1, #group do
     local bt = group[n]
     bt:update(dt)
+    if bt.selected then
+      current_bt = bt
+    end
   end
+  if not current_bt then
+  end
+  return current_bt
 end
 --
 
@@ -223,5 +240,7 @@ function button.addGroupName(groupName, bt)
   return gr
 end
 --
+
+button.ungrouped = button.newGroup("unGrouped")
 
 return button

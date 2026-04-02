@@ -40,6 +40,10 @@ end
 --
 
 function scene.update(dt)
+  -- Cores priority
+  Mouse.update(dt)
+
+  -- Scenes
   if current then
     current.update(dt)
   end
@@ -47,6 +51,7 @@ end
 --
 
 function scene.draw()
+  -- Scenes
   if current then
     current.draw()
     if scene.debug then
@@ -55,6 +60,9 @@ function scene.draw()
   else
     love.graphics.print("Oops, no Scene is currently running, you need to create a scene",10,10)
   end
+
+  -- Cores in end of draw for debug :
+  Mouse.draw()
 end
 --
 
