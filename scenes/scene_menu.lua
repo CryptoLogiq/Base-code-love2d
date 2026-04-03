@@ -29,11 +29,11 @@ function menu.draw()
   nav.group:draw()
 
   if menu.current then
-    -- polish visual current button il selected :
+    -- polish visual current button if selected :
     local bt = menu.current
     love.graphics.setColor(0,1,0,1)
-    love.graphics.rectangle("line", bt.x,bt.y,bt.w,bt.h, bt.rounded)
-    love.graphics.setColor(1,1,1,1)
+    love.graphics.rectangle("line", bt.x, bt.y, bt.w, bt.h, bt.rounded)
+    love.graphics.setColor(1,1,1,1) 
   end
 end
 --
