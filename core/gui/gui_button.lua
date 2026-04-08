@@ -43,7 +43,7 @@ local function update(self, dt)
   txt.y = self.cy - txt.oy
 
   -- Mouse on button ? if yes selected this button :
-  if Mouse.x >= self.x and Mouse.y >= self.y and Mouse.x <= self.x + self.w and Mouse.y <= self.y + self.h then
+  if AABB_Mouse(Mouse, self) then
     self:isSelect(self)
   else
     self.selected = false
@@ -164,7 +164,7 @@ end
 local function groupMousepressed(group, x,y,button,istouch,presses)
   for n=1, #group do
     local bt = group[n]
-    if x >= bt.x and y >= bt.y and x <= bt.x + bt.w and y <= bt.y + bt.h then
+    if AABB_Mouse(Mouse, bt) then
       bt:isSelect()
       bt:fct()
       break

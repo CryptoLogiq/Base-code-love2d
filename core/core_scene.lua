@@ -4,8 +4,29 @@ local lst_Scenes = {}
 
 local current = nil
 
-function scene.new(name)
+function scene.getScene(name, new)
   if not name then return print('Scene Name is required for create a new scene --> Scene.new("SceneName")') end
+  --
+  for k, scenes in ipairs(lst_Scenes) do
+    if scenes.name == name then
+      if new then
+        print('Scene Name is already used, choice a other name')
+      end
+      return scenes
+    end
+  end
+  --
+  return false
+end
+--
+
+function scene.new(name)
+  local scn = scene.getScene(name, true)
+  --
+  if scn then
+    return scn
+  end
+  --
   local new = {name=name}
   if #lst_Scenes <= 0 then scene.setScene(new) end
   table.insert(lst_Scenes, new)
