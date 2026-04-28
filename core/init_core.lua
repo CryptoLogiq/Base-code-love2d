@@ -10,6 +10,7 @@ Core = require(f.."manager")
 --#########################
 --### Core modules
 --#########################
+Core.Input = require(f.."input")
 Core.Gui = require(f.."gui")
 Core.Timer = require(f.."timer")
 Core.Mouse = require(f.."mouse")

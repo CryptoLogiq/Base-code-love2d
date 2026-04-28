@@ -93,13 +93,14 @@ end
 --## buttons ## :
 
 function button.new(text, x, y, w, h, group, fct)
-
-  local new = {name=text, x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, selected=false, isSelect=isSelect,  load=load, update=update, draw=draw, getGroup=getGroup, setFunction=setFunction, setFont=setFont, setText=setText}
+  local  usedFont = love.graphics.getFont()
+  --
+  local new = {name=text, font=usedFont,x=x, y=y, w=w, h=h, rounded=15, rotate=0, sx=1, sy=1, ox=0, oy=0, color={1,1,1,1}, selected=false, isSelect=isSelect,  load=load, update=update, draw=draw, getGroup=getGroup, setFunction=setFunction, setFont=setFont, setText=setText}
+  --
   new.cx = new.w/2
   new.cy = new.h/2
   --
-  local  usedFont = love.graphics.getFont()
-  new.text = {data=love.graphics.newText(usedFont, new.name),  x=0, y=0, w=0, h=0, ox=0, oy=0, color={0,0,0,1}, colorSelect={0,1,0,1}, colorDefaut={0,0,0,1}}
+  new.text = {data=love.graphics.newText(new.font, new.name),  x=0, y=0, w=0, h=0, ox=0, oy=0, color={0,0,0,1}, colorSelect={0,1,0,1}, colorDefaut={0,0,0,1}}
   new.text.w,new.text.h = new.text.data:getDimensions()
   --
   if not fct then
@@ -116,6 +117,7 @@ function button.new(text, x, y, w, h, group, fct)
   if group then
     if type(group) == "table" then
       new.group = group
+      button.addGroupName(group, new)
 
     elseif type(group) == "string" then
       new.group = button.addGroupName(group, new)
@@ -199,44 +201,29 @@ end
 --
 
 function button.addGroupName(groupName, bt)
-  local groupExist = false
-  local gr = {}
-  --
-  if not button.lst_group.groupName then
+  local gr = nil
 
-    if type(groupName) == "string" then
+  if type(groupName) == "string" then
+    gr = button.lst_group[groupName]
 
-      if button.lst_group[groupName] then
-        gr = button.lst_group[groupName]
-      else
-        gr = button.newGroup(groupName)
-      end
-      groupExist = true
-
-    elseif type(groupName) == "table" then
-
-      for index, groups in pairs(button.lst_group) do
-        if groupName == groups then
-          gr = groups
-          groupExist = true
-          break
-        end
-      end
-
+    if not gr then
+      gr = button.newGroup(groupName)
     end
 
-  end
-  --
-  if not groupExist then
+  elseif type(groupName) == "table" then
+    gr = groupName
+
+  else
     print('bad argument with', groupName)
     print('You need create a group with "text variable" OR "group table" use before : button.newGroup(name)')
     return nil
   end
-  --
+
   local id = #gr + 1
   bt.id = id
   table.insert(gr, bt)
   bt.group = gr
+
   return gr
 end
 --

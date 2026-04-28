@@ -45,7 +45,7 @@ function corescene.SetScene(scene)
     current = scene
     if scene.load then
       if not scene.loaded then
-        scene.load()
+        corescene.load(scene)
       end
     end
     
@@ -81,38 +81,35 @@ end
 --
 
 function corescene.update(dt)
-  -- Scenes
-  if current then
+  if current and current.update then
     current.update(dt)
   end
 end
 --
 
 function corescene.draw()
-  -- Scenes
-  if current then
+  if current and current.draw then
     current.draw()
+
     if corescene.debug then
-      love.graphics.print("Scene current running is : "..current.name,10,10)
+      love.graphics.print("Scene current running is : " .. current.name, 10, 10)
     end
   else
-    love.graphics.print("Oops, no Scene is currently running, you need to create a scene",10,10)
-  end
-  
-  
-end
---
-
-function corescene.mousepressed(x,y,button,istouch,presses)
-  if current then
-    current.mousepressed(x,y,button,istouch,presses)
+    love.graphics.print("Oops, no Scene is currently running", 10, 10)
   end
 end
 --
 
-function corescene.keypressed(k,s,isrepeat)
-  if current then
-    current.keypressed(k,s,isrepeat)
+function corescene.mousepressed(x, y, button, istouch, presses)
+  if current and current.mousepressed then
+    current.mousepressed(x, y, button, istouch, presses)
+  end
+end
+--
+
+function corescene.keypressed(k, s, isrepeat)
+  if current and current.keypressed then
+    current.keypressed(k, s, isrepeat)
   end
 end
 --
