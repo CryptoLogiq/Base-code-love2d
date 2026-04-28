@@ -1,18 +1,21 @@
-local scene = {debug=true}
+local corescene = {debug=true}
 
 local lst_Scenes = {}
 
 local current = nil
 
-function scene.getScene(name, new)
-  if not name then return print('Scene Name is required for create a new scene --> Scene.new("SceneName")') end
+function corescene.GetScene(name, new)
+  if not name then return print('Scene Name is required for create a new scene --> Core.Scene.New("SceneName")') end
   --
-  for k, scenes in ipairs(lst_Scenes) do
-    if scenes.name == name then
+  for k, scene in ipairs(lst_Scenes) do
+    if scene.name == name then
       if new then
         print('Scene Name is already used, choice a other name')
       end
-      return scenes
+      if corescene.debug then
+        print("scene found : "..scene.name)
+      end
+      return scene
     end
   end
   --
@@ -20,30 +23,42 @@ function scene.getScene(name, new)
 end
 --
 
-function scene.new(name)
-  local scn = scene.getScene(name, true)
+function corescene.New(name)
+  local scn = corescene.GetScene(name, true)
   --
   if scn then
     return scn
   end
   --
-  local new = {name=name}
-  if #lst_Scenes <= 0 then scene.setScene(new) end
+  local new = {name=name, loaded=false}
+  if #lst_Scenes <= 0 then corescene.SetScene(new) end
   table.insert(lst_Scenes, new)
+  if corescene.debug then
+    print("scene created : "..new.name)
+  end
   return new
 end
 --
 
-function scene.setScene(scene)
+function corescene.SetScene(scene)
   if scene then
     current = scene
+    if scene.load then
+      if not scene.loaded then
+        scene.load()
+      end
+    end
+    
+    if corescene.debug then
+      print("Scene set to : "..scene.name)
+    end
   else
-    print('Scene variable is required for set a current Scene --> Scene.setScene("MySceneTable")')
+    print('Scene variable is required for set a current Scene --> Core.Scene.SetScene("MySceneTable")')
   end
 end
 --
 
-function scene.load(scene)
+function corescene.load(scene)
   if not current then
     current = lst_Scenes[1]
   end
@@ -52,18 +67,20 @@ function scene.load(scene)
     --
     if scene then
       scene.load()
+      scene.loaded = true
     else
       current.load()
+      current.loaded = true
+    end
+    if corescene.debug then
+      print("Scene loaded : "..current.name)
     end
     --
   end
 end
 --
 
-function scene.update(dt)
-  -- Cores priority
-  Mouse.update(dt)
-
+function corescene.update(dt)
   -- Scenes
   if current then
     current.update(dt)
@@ -71,34 +88,33 @@ function scene.update(dt)
 end
 --
 
-function scene.draw()
+function corescene.draw()
   -- Scenes
   if current then
     current.draw()
-    if scene.debug then
+    if corescene.debug then
       love.graphics.print("Scene current running is : "..current.name,10,10)
     end
   else
     love.graphics.print("Oops, no Scene is currently running, you need to create a scene",10,10)
   end
-
-  -- Cores in end of draw for debug :
-  Mouse.draw()
+  
+  
 end
 --
 
-function scene.mousepressed(x,y,button,istouch,presses)
+function corescene.mousepressed(x,y,button,istouch,presses)
   if current then
     current.mousepressed(x,y,button,istouch,presses)
   end
 end
 --
 
-function scene.keypressed(k,s,isrepeat)
+function corescene.keypressed(k,s,isrepeat)
   if current then
     current.keypressed(k,s,isrepeat)
   end
 end
 --
 
-return scene
+return corescene

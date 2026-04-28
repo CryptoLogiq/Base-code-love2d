@@ -1,5 +1,5 @@
 
-local game = Scene.new("Game")
+local game = Core.Scene.New("Game")
 
 function game.load()
 end

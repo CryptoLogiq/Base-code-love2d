@@ -2,26 +2,26 @@
 require("init")
 
 function love.load()
-  Scene.load()
+  Core.load()
 end
 --
 
 function love.update(dt)
-  Scene.update(dt)
+  Core.update(dt)
 end
 --
 
 function love.draw()
-  Scene.draw()
+  Core.draw()
 end
 --
 
 function love.mousepressed(x, y, button, istouch, presses)
-  Scene.mousepressed(x, y, button, istouch, presses)
+  Core.mousepressed(x, y, button, istouch, presses)
 end
 --
 
 function love.keypressed(k, s, isrepeat)
-  Scene.keypressed(k, s, isrepeat)
+  Core.keypressed(k, s, isrepeat)
 end
 --

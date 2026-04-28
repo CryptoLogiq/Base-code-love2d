@@ -1,11 +1,11 @@
 
-local menu = Scene.new("Menu")
+local menu = Core.Scene.New("Menu")
 
 --
 local nav = {}
-nav.group = Gui.button.newGroup("Menu")
-nav.main = Gui.button.new("Play", 150, 200, 500, 50, "Menu", function(self) Scene.setScene(Game) end)
-nav.quit = Gui.button.new("Quit", 150, 500, 500, 50, "Menu", function(self) love.event.quit() end)
+nav.group = Core.Gui.button.newGroup("Menu")
+nav.main = Core.Gui.button.new("Play", 150, 200, 500, 50, "Menu", function(self) Core.Scene.SetScene(Game) end)
+nav.quit = Core.Gui.button.new("Quit", 150, 500, 500, 50, "Menu", function(self) love.event.quit() end)
 --
 
 --

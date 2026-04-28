@@ -43,7 +43,7 @@ local function update(self, dt)
   txt.y = self.cy - txt.oy
 
   -- Mouse on button ? if yes selected this button :
-  if AABB_Mouse(Mouse, self) then
+  if Core.Collision.AABB_Mouse(Core.Mouse, self) then
     self:isSelect(self)
   else
     self.selected = false
@@ -164,7 +164,7 @@ end
 local function groupMousepressed(group, x,y,button,istouch,presses)
   for n=1, #group do
     local bt = group[n]
-    if AABB_Mouse(Mouse, bt) then
+    if Core.Collision.AABB_Mouse(Core.Mouse, bt) then
       bt:isSelect()
       bt:fct()
       break
@@ -200,7 +200,7 @@ end
 
 function button.addGroupName(groupName, bt)
   local groupExist = false
-  local gr = nil
+  local gr = {}
   --
   if not button.lst_group.groupName then
 
