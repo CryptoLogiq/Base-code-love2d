@@ -1,25 +1,57 @@
-local menu = Core.Scene.New("Menu")
+local menu = Core.Scene.new("Menu")
 
 local nav = {}
 
-menu.page = Core.Gui.Page.new("MenuPage")
+menu.page = Core.Gui.newPage("MenuPage")
 
-nav.group = Core.Gui.button.newGroup("Menu")
+nav.group = Core.Gui.newButtonGroup("Menu", {
+  direction = "vertical",
+  x = "center",
+  y = 190,
+  w = 500,
+  h = 50,
+  areaH = 360,
+  spacing = "auto",
+})
 menu.page:addGroup("main", nav.group)
 
-nav.main = Core.Gui.button.new("Play", 150, 200, 500, 50, nav.group, function(self)
-  Core.Scene.SetScene(Game)
+nav.play = Core.Gui.newButton("Play", 0, 0, 500, 50, nav.group, function(self)
+  Core.Scene.set(Game)
 end)
 
-nav.quit = Core.Gui.button.new("Quit", 150, 500, 500, 50, nav.group, function(self)
+nav.options = Core.Gui.newButton("Options", 0, 0, 500, 50, nav.group, function(self)
+  Core.Scene.set(Options)
+end)
+
+nav.spritesheet = Core.Gui.newButton("SpriteSheet", 0, 0, 500, 50, nav.group, function(self)
+  Core.Scene.set(SpriteSheet)
+end)
+
+nav.credits = Core.Gui.newButton("Credits", 0, 0, 500, 50, nav.group, function(self)
+  print("Credits menu is not implemented yet.")
+end)
+nav.credits:setVisible(false)
+
+nav.quit = Core.Gui.newButton("Quit", 0, 0, 500, 50, nav.group, function(self)
   love.event.quit()
 end)
 
+function menu.setCreditsUnlocked(unlocked)
+  nav.credits:setVisible(unlocked == true)
+end
+
 function menu.load()
-  menu.page:show()
   nav.group:load()
   nav.group:selectIndex(1)
+end
+
+function menu.enter(previousScene)
+  menu.page:show()
   menu.page:setActiveGroup("main")
+end
+
+function menu.leave(nextScene)
+  menu.page:hide()
 end
 
 function menu.update(dt)

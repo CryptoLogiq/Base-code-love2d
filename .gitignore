@@ -1,1 +1,8 @@
 *.zip
+
+.vscode
+.git
+
+# Local / temporary files
+.codex
+test.txt
