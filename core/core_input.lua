@@ -5,6 +5,7 @@ local coreinput = {}
 -- =========================================================
 
 coreinput.deadzone = 0.25
+coreinput.keyboardLayout = "unknown"
 
 local function copyBindingsMap(src)
   local dst = {}
@@ -18,6 +19,79 @@ local function copyBindingsMap(src)
   end
 
   return dst
+end
+
+local function removeTokens(bindings, tokensToRemove)
+  for i = #bindings, 1, -1 do
+    if tokensToRemove[bindings[i]] then
+      table.remove(bindings, i)
+    end
+  end
+end
+
+local function appendTokenOnce(bindings, token)
+  for _, existingToken in ipairs(bindings) do
+    if existingToken == token then
+      return
+    end
+  end
+
+  table.insert(bindings, token)
+end
+
+local function normalizeKeyboardLayout(layout)
+  if layout == "azerty" or layout == "qwerty" then
+    return layout
+  end
+
+  return "unknown"
+end
+
+local function detectKeyboardLayout()
+  if love and love.keyboard and love.keyboard.getKeyFromScancode then
+    local keyA = love.keyboard.getKeyFromScancode("a")
+    local keyW = love.keyboard.getKeyFromScancode("w")
+    local keyQ = love.keyboard.getKeyFromScancode("q")
+
+    if keyA == "q" or keyW == "z" then
+      return "azerty"
+    end
+
+    if keyA == "a" or keyW == "w" or keyQ == "q" then
+      return "qwerty"
+    end
+  end
+
+  return "unknown"
+end
+
+local function applyKeyboardLayoutBindings(layout)
+  layout = normalizeKeyboardLayout(layout)
+
+  local movementTokens = {
+    ["key:z"] = true,
+    ["key:q"] = true,
+    ["key:w"] = true,
+    ["key:a"] = true,
+  }
+
+  local movementActions = {
+    up = true,
+    left = true,
+  }
+
+  for action, _ in pairs(movementActions) do
+    coreinput.map[action] = coreinput.map[action] or {}
+    removeTokens(coreinput.map[action], movementTokens)
+  end
+
+  if layout == "qwerty" then
+    appendTokenOnce(coreinput.map.up, "key:w")
+    appendTokenOnce(coreinput.map.left, "key:a")
+  else
+    appendTokenOnce(coreinput.map.up, "key:z")
+    appendTokenOnce(coreinput.map.left, "key:q")
+  end
 end
 
 -- Convention des bindings :
@@ -169,6 +243,9 @@ end
 -- =========================================================
 
 function coreinput.load()
+  coreinput.keyboardLayout = detectKeyboardLayout()
+  applyKeyboardLayoutBindings(coreinput.keyboardLayout)
+
   local joysticks = love.joystick.getJoysticks()
 
   for _, joystick in ipairs(joysticks) do
@@ -285,12 +362,41 @@ function coreinput.getBindings(action)
   return result
 end
 
+function coreinput.getAllBindings()
+  return copyBindingsMap(coreinput.map)
+end
+
 function coreinput.setBindings(action, bindings)
   coreinput.map[action] = {}
 
   for i, token in ipairs(bindings or {}) do
     coreinput.map[action][i] = token
   end
+end
+
+function coreinput.setAllBindings(bindingsMap)
+  if type(bindingsMap) ~= "table" then
+    return false
+  end
+
+  coreinput.map = copyBindingsMap(bindingsMap)
+  return true
+end
+
+function coreinput.detectKeyboardLayout()
+  coreinput.keyboardLayout = detectKeyboardLayout()
+  applyKeyboardLayoutBindings(coreinput.keyboardLayout)
+  return coreinput.keyboardLayout
+end
+
+function coreinput.getKeyboardLayout()
+  return coreinput.keyboardLayout
+end
+
+function coreinput.setKeyboardLayout(layout)
+  coreinput.keyboardLayout = normalizeKeyboardLayout(layout)
+  applyKeyboardLayoutBindings(coreinput.keyboardLayout)
+  return coreinput.keyboardLayout
 end
 
 local function getTokenPrefix(token)
@@ -354,6 +460,8 @@ end
 
 function coreinput.resetBindings()
   coreinput.map = copyBindingsMap(coreinput.defaultMap)
+  coreinput.keyboardLayout = detectKeyboardLayout()
+  applyKeyboardLayoutBindings(coreinput.keyboardLayout)
 end
 
 function coreinput.tokenToLabel(token)

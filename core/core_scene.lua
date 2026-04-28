@@ -3,17 +3,44 @@ local corescene = {debug=true}
 local lst_Scenes = {}
 
 local current = nil
+local unpackColor = table.unpack or unpack
+
+local function readBackgroundColor()
+  if love and love.graphics and love.graphics.getBackgroundColor then
+    return {love.graphics.getBackgroundColor()}
+  end
+
+  return {0, 0, 0, 1}
+end
+
+local function sameColor(a, b)
+  if not a or not b then
+    return false
+  end
+
+  local epsilon = 0.001
+  return math.abs((a[1] or 0) - (b[1] or 0)) <= epsilon
+    and math.abs((a[2] or 0) - (b[2] or 0)) <= epsilon
+    and math.abs((a[3] or 0) - (b[3] or 0)) <= epsilon
+    and math.abs((a[4] or 1) - (b[4] or 1)) <= epsilon
+end
+
+local function applyBackgroundColor(color)
+  if color and love and love.graphics and love.graphics.setBackgroundColor then
+    love.graphics.setBackgroundColor(unpackColor(color))
+  end
+end
 
 local function resolveScene(sceneOrName)
   if type(sceneOrName) == "string" then
-    return corescene.GetScene(sceneOrName, false)
+    return corescene.getScene(sceneOrName, false)
   end
 
   return sceneOrName
 end
 
-function corescene.GetScene(name, new)
-  if not name then return print('Scene Name is required for create a new scene --> Core.Scene.New("SceneName")') end
+function corescene.getScene(name, new)
+  if not name then return print('Scene name is required --> Core.Scene.new("SceneName")') end
   --
   for k, scene in ipairs(lst_Scenes) do
     if scene.name == name then
@@ -31,16 +58,20 @@ function corescene.GetScene(name, new)
 end
 --
 
-function corescene.New(name)
-  local scn = corescene.GetScene(name, true)
+function corescene.get(name, new)
+  return corescene.getScene(name, new)
+end
+
+function corescene.new(name)
+  local scn = corescene.getScene(name, true)
   --
   if scn then
     return scn
   end
   --
-  local new = {name=name, loaded=false, entered=false}
+  local new = {name=name, loaded=false, entered=false, backgroundColor=nil}
 
-  -- Important : on ne lance pas SetScene ici.
+  -- Important : on ne lance pas setScene ici.
   -- La scène vient tout juste d'être créée, ses méthodes load/enter/update/draw
   -- ne sont pas encore déclarées par le fichier scene_xxx.lua.
   table.insert(lst_Scenes, new)
@@ -56,11 +87,72 @@ function corescene.New(name)
 end
 --
 
-function corescene.SetScene(sceneOrName)
+function corescene.getCurrent()
+  return current
+end
+--
+
+function corescene.syncBackgroundColor(sceneOrName)
+  local scene = resolveScene(sceneOrName) or current
+
+  if not scene then
+    return nil
+  end
+
+  local color = readBackgroundColor()
+
+  if not sameColor(scene.backgroundColor, color) then
+    scene.backgroundColor = color
+  end
+
+  return color[1], color[2], color[3], color[4]
+end
+--
+
+function corescene.getBackgroundColor(sceneOrName)
+  local scene = resolveScene(sceneOrName) or current
+
+  if scene and scene.backgroundColor then
+    return unpackColor(scene.backgroundColor)
+  end
+
+  return love.graphics.getBackgroundColor()
+end
+--
+
+function corescene.setBackgroundColor(r, g, b, a, sceneOrName)
+  local scene = resolveScene(sceneOrName) or current
+  local color = type(r) == "table" and {r[1], r[2], r[3], r[4] or 1} or {r or 0, g or 0, b or 0, a or 1}
+
+  if scene then
+    scene.backgroundColor = color
+  end
+
+  if not sceneOrName or scene == current then
+    applyBackgroundColor(color)
+  end
+
+  return color[1], color[2], color[3], color[4]
+end
+--
+
+function corescene.applyBackgroundColor(sceneOrName)
+  local scene = resolveScene(sceneOrName) or current
+
+  if scene and scene.backgroundColor then
+    applyBackgroundColor(scene.backgroundColor)
+    return unpackColor(scene.backgroundColor)
+  end
+
+  return nil
+end
+--
+
+function corescene.set(sceneOrName)
   local scene = resolveScene(sceneOrName)
 
   if not scene then
-    print('Scene variable is required for set a current Scene --> Core.Scene.SetScene("MySceneTable")')
+    print('Scene variable is required --> Core.Scene.set("MySceneTable")')
     return
   end
 
@@ -73,12 +165,18 @@ function corescene.SetScene(sceneOrName)
     previous = nil
   end
 
+  if previous and previous ~= scene then
+    corescene.syncBackgroundColor(previous)
+  end
+
   if previous and previous ~= scene and previous.leave then
     previous.leave(scene)
     previous.entered = false
   end
 
   current = scene
+
+  corescene.applyBackgroundColor(scene)
 
   if scene.load and not scene.loaded then
     corescene.load(scene)
@@ -116,7 +214,7 @@ function corescene.load(sceneOrName)
   end
 
   if current then
-    corescene.SetScene(current)
+    corescene.set(current)
   end
 
   return current
@@ -146,6 +244,13 @@ end
 function corescene.mousepressed(x, y, button, istouch, presses)
   if current and current.mousepressed then
     current.mousepressed(x, y, button, istouch, presses)
+  end
+end
+--
+
+function corescene.mousemoved(x, y, dx, dy, istouch)
+  if current and current.mousemoved then
+    current.mousemoved(x, y, dx, dy, istouch)
   end
 end
 --

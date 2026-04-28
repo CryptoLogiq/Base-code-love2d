@@ -1,37 +1,41 @@
-local optionsScene = Core.Scene.New("Options")
+local optionsScene = Core.Scene.new("Options")
 
 local function goBackToMenu()
-  Core.Scene.SetScene(Menu)
+  Core.Scene.set(Menu)
 end
 
 function optionsScene.load()
   Core.Options.setup({
     title = "Options",
-    x = 150,
+    x = 80,
     y = 80,
-    w = 620,
-    rowH = 34,
-    rowSpacing = 6,
+    w = 700,
+    rowH = 40,
+    rowSpacing = 8,
+    dropdownMaxVisible = 7,
     back = goBackToMenu,
   })
 
-  Core.Options.addVolume("master_volume", "Volume général")
-  Core.Options.addFullscreen("fullscreen", "Plein écran")
-  Core.Options.addResolution("resolution", "Résolution")
+  Core.Options.newVolume("master_volume", "Volume général")
+  Core.Options.newFullscreen("fullscreen", "Plein écran")
+  Core.Options.newLetterbox("letterbox", "Bandes noires")
+  Core.Options.newAspectFormat("aspect_format", "Format")
+  Core.Options.newResolution("resolution", "Résolution")
+  Core.Options.newKeyboardLayout("keyboard_layout", "Clavier")
 
-  Core.Options.addInput("validate", "Input : Valider")
-  Core.Options.addInput("cancel", "Input : Annuler / Retour")
-  Core.Options.addInput("up", "Input : Haut")
-  Core.Options.addInput("down", "Input : Bas")
-  Core.Options.addInput("left", "Input : Gauche")
-  Core.Options.addInput("right", "Input : Droite")
-  Core.Options.addInput("attack", "Input : Attaque")
+  Core.Options.newInput("validate", "Input : Valider")
+  Core.Options.newInput("cancel", "Input : Annuler / Retour")
+  Core.Options.newInput("up", "Input : Haut")
+  Core.Options.newInput("down", "Input : Bas")
+  Core.Options.newInput("left", "Input : Gauche")
+  Core.Options.newInput("right", "Input : Droite")
+  Core.Options.newInput("attack", "Input : Attaque")
 
-  Core.Options.addAction("reset_inputs", "Réinitialiser les inputs", function()
+  Core.Options.newAction("reset_inputs", "Réinitialiser les inputs", function()
     Core.Input.resetBindings()
   end)
 
-  Core.Options.addAction("back", "Retour", goBackToMenu)
+  Core.Options.newAction("back", "Retour", goBackToMenu)
 
   Core.Options.build()
 end

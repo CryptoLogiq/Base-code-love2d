@@ -28,6 +28,10 @@ function love.mousereleased(x, y, button, istouch, presses)
   Core.mousereleased(x, y, button, istouch, presses)
 end
 
+function love.mousemoved(x, y, dx, dy, istouch)
+  Core.mousemoved(x, y, dx, dy, istouch)
+end
+
 function love.gamepadpressed(joystick, button)
   Core.gamepadpressed(joystick, button)
 end

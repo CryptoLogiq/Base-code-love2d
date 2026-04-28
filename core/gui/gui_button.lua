@@ -50,6 +50,15 @@ local function setVisible(self, visible)
   if not self.visible then
     self.hovered = false
     self.selected = false
+    self.visualActive = false
+  end
+
+  if self.group and self.group.applyLayout then
+    self.group:applyLayout()
+
+    if self.group.current == self and self.group.selectFirstAvailable then
+      self.group:selectFirstAvailable()
+    end
   end
 
   return self
@@ -61,6 +70,19 @@ local function setEnabled(self, enabled)
   if not self.enabled then
     self.hovered = false
     self.selected = false
+    self.visualActive = false
+  end
+
+  return self
+end
+
+local function setTextAlign(self, align, padding)
+  if align == "left" or align == "center" or align == "right" then
+    self.textAlign = align
+  end
+
+  if padding then
+    self.textPadding = padding
   end
 
   return self
@@ -83,15 +105,24 @@ local function update(self, dt)
   local txt = self.text
   txt.ox = txt.w / 2
   txt.oy = txt.h / 2
-  txt.x = self.cx - txt.ox
-  txt.y = self.cy - txt.oy
+
+  if self.textAlign == "left" then
+    txt.x = self.x + (self.textPadding or 12)
+    txt.y = self.cy - txt.oy
+  elseif self.textAlign == "right" then
+    txt.x = self.x + self.w - txt.w - (self.textPadding or 12)
+    txt.y = self.cy - txt.oy
+  else
+    txt.x = self.cx - txt.ox
+    txt.y = self.cy - txt.oy
+  end
 
   if self.enabled == false then
     self.hovered = false
     return
   end
 
-  self.hovered = Core.Collision.AABB_Mouse(Core.Mouse, self)
+  self.hovered = Core.Collision.aabbMouse(Core.Mouse, self)
 end
 
 local function draw(self)
@@ -112,7 +143,7 @@ local function draw(self)
 
   if self.enabled == false and txt.colorDisabled then
     love.graphics.setColor(txt.colorDisabled[1], txt.colorDisabled[2], txt.colorDisabled[3], txt.colorDisabled[4] or 1)
-  elseif self.selected or self.hovered then
+  elseif self.visualActive or (not self.group and (self.selected or self.hovered)) then
     love.graphics.setColor(txt.colorSelect[1], txt.colorSelect[2], txt.colorSelect[3], txt.colorSelect[4] or 1)
   else
     love.graphics.setColor(txt.color[1], txt.color[2], txt.color[3], txt.color[4] or 1)
@@ -167,6 +198,10 @@ end
 -- =========================================================
 
 local function groupLoad(group)
+  if group.applyLayout then
+    group:applyLayout()
+  end
+
   for n = 1, #group do
     group[n]:load()
   end
@@ -269,16 +304,33 @@ local function groupGetHovered(group)
 end
 
 local function groupGetVisualCurrent(group)
-  if group.visible == false then
+  if group.visible == false or group.enabled == false then
     return nil
   end
 
   local hovered = group:getHovered()
+  local mode = "keyboard"
 
-  if hovered then
-    return hovered
+  if Core and Core.Gui and Core.Gui.getInputMode then
+    mode = Core.Gui.getInputMode()
   end
 
+  -- Mode souris : le groupe survole devient actif via syncHoveredSelection().
+  -- On ne dessine le feedback souris que sur le groupe actif, pour eviter
+  -- deux contours actifs si plusieurs groupes visibles existent.
+  if mode == "mouse" then
+    if group.active and hovered then
+      return hovered
+    end
+
+    if group.active and groupIsButtonSelectable(group, group.current) then
+      return group.current
+    end
+
+    return nil
+  end
+
+  -- Mode clavier / manette : le hover souris ne vole pas le feedback.
   if group.active and groupIsButtonSelectable(group, group.current) then
     return group.current
   end
@@ -312,6 +364,47 @@ local function groupDrawFocus(group, bt)
   love.graphics.setColor(1, 1, 1, 1)
 end
 
+local function groupSyncHoveredSelection(group)
+  if group.visible == false or group.enabled == false then
+    return false
+  end
+
+  local mode = "keyboard"
+
+  if Core and Core.Gui and Core.Gui.getInputMode then
+    mode = Core.Gui.getInputMode()
+  end
+
+  -- On synchronise la selection clavier/manette uniquement quand la souris
+  -- est le dernier peripherique actif.
+  -- Sinon, une souris posee sur un bouton volerait la selection pendant
+  -- une navigation clavier/manette.
+  if mode ~= "mouse" then
+    return false
+  end
+
+  local hovered, hoveredIndex = group:getHovered()
+
+  if not hovered or not hoveredIndex then
+    return false
+  end
+
+  -- Le groupe survole devient le groupe actif.
+  -- Comme ca, si on passe ensuite au clavier/manette,
+  -- la navigation repart de ce groupe et de ce bouton.
+  if Core and Core.Gui and Core.Gui.setActiveGroup then
+    Core.Gui.setActiveGroup(group)
+  else
+    group.active = true
+  end
+
+  if group.current ~= hovered or group.selectedIndex ~= hoveredIndex then
+    group:selectIndex(hoveredIndex)
+  end
+
+  return true
+end
+
 local function groupHandleInput(group)
   if group.visible == false or group.enabled == false or group.active ~= true then
     return false
@@ -337,21 +430,36 @@ local function groupUpdate(group, dt)
   if group.visible == false then
     group.hovered = nil
     group.visualCurrent = nil
+
+    for n = 1, #group do
+      group[n].visualActive = false
+    end
+
     return group.current
+  end
+
+  if group.applyLayout then
+    group:applyLayout()
   end
 
   for n = 1, #group do
     group[n]:update(dt)
   end
 
-  if not group.current and #group > 0 then
+  if (not group.current or not groupIsButtonSelectable(group, group.current)) and #group > 0 then
     group:selectFirstAvailable()
   end
 
   group.hovered = group:getHovered()
+
+  group:syncHoveredSelection()
+  group:handleInput()
+
   group.visualCurrent = group:getVisualCurrent()
 
-  group:handleInput()
+  for n = 1, #group do
+    group[n].visualActive = group[n] == group.visualCurrent
+  end
 
   return group.current
 end
@@ -361,11 +469,16 @@ local function groupDraw(group)
     return
   end
 
+  -- Recalcule au moment du draw pour eviter un feedback visuel stale
+  -- si un autre groupe a pris le focus apres l'update de ce groupe.
+  group.visualCurrent = group:getVisualCurrent()
+
   for n = 1, #group do
+    group[n].visualActive = group[n] == group.visualCurrent
     group[n]:draw()
   end
 
-  group:drawFocus(group:getVisualCurrent())
+  group:drawFocus(group.visualCurrent)
 end
 
 local function groupMousepressed(group, x, y, mouseButton, istouch, presses)
@@ -380,7 +493,11 @@ local function groupMousepressed(group, x, y, mouseButton, istouch, presses)
   for n = 1, #group do
     local bt = group[n]
 
-    if groupIsButtonSelectable(group, bt) and (bt.hovered or Core.Collision.AABB_Mouse(Core.Mouse, bt)) then
+    if groupIsButtonSelectable(group, bt) and (bt.hovered or Core.Collision.aabbMouse(Core.Mouse, bt)) then
+      if Core and Core.Gui and Core.Gui.setInputMode then
+        Core.Gui.setInputMode("mouse", true)
+      end
+
       if Core and Core.Gui and Core.Gui.setActiveGroup then
         Core.Gui.setActiveGroup(group)
       else
@@ -421,6 +538,10 @@ local function groupSetVisible(group, visible)
     group.hovered = nil
     group.visualCurrent = nil
 
+    for n = 1, #group do
+      group[n].visualActive = false
+    end
+
     if Core and Core.Gui and Core.Gui.getActiveGroup and Core.Gui.getActiveGroup() == group then
       Core.Gui.clearActiveGroup(group)
     end
@@ -435,6 +556,10 @@ local function groupSetEnabled(group, enabled)
   if not group.enabled then
     group.hovered = nil
     group.visualCurrent = nil
+
+    for n = 1, #group do
+      group[n].visualActive = false
+    end
   end
 
   return group
@@ -455,6 +580,145 @@ local function groupSetActive(group, active)
     Core.Gui.setActiveGroup(group)
   else
     group.active = true
+  end
+
+  return group
+end
+
+local function groupSetLayout(group, config)
+  if type(config) == "string" then
+    config = { direction = config }
+  end
+
+  config = config or {}
+
+  local direction = config.direction or config.orientation or config.axis or group.layoutDirection or "vertical"
+
+  if direction ~= "horizontal" then
+    direction = "vertical"
+  end
+
+  group.autoLayout = config.enabled ~= false
+  group.layoutDirection = direction
+  group.layoutX = config.x or group.layoutX or 0
+  group.layoutY = config.y or group.layoutY or 0
+  group.layoutW = config.w or group.layoutW
+  group.layoutH = config.h or group.layoutH
+  group.layoutAreaW = config.areaW or config.containerW or group.layoutAreaW
+  group.layoutAreaH = config.areaH or config.containerH or group.layoutAreaH
+  group.layoutSpacingAuto = config.spacing == "auto" or config.autoSpacing == true
+
+  if type(config.spacing) == "number" then
+    group.layoutSpacing = config.spacing
+  elseif not group.layoutSpacing then
+    group.layoutSpacing = 12
+  end
+
+  if group.applyLayout then
+    group:applyLayout()
+  end
+
+  return group
+end
+
+local function groupLayoutVertical(group, x, y, spacing, w, h)
+  return group:setLayout({
+    direction = "vertical",
+    x = x,
+    y = y,
+    spacing = spacing,
+    w = w,
+    h = h,
+  })
+end
+
+local function groupLayoutHorizontal(group, x, y, spacing, w, h)
+  return group:setLayout({
+    direction = "horizontal",
+    x = x,
+    y = y,
+    spacing = spacing,
+    w = w,
+    h = h,
+  })
+end
+
+local function groupApplyLayout(group)
+  if group.autoLayout ~= true then
+    return group
+  end
+
+  local virtualW, virtualH = 1280, 720
+
+  if Core and Core.getDimensions then
+    virtualW, virtualH = Core.getDimensions()
+  end
+
+  local cursorX = group.layoutX or 0
+  local cursorY = group.layoutY or 0
+  local spacing = group.layoutSpacing or 0
+  local visibleCount = 0
+  local totalSize = 0
+
+  if cursorX == "center" and group.layoutW then
+    cursorX = (virtualW - group.layoutW) / 2
+  elseif cursorX == "right" and group.layoutW then
+    cursorX = virtualW - group.layoutW
+  end
+
+  if cursorY == "center" then
+    local areaH = group.layoutAreaH or virtualH
+    cursorY = (virtualH - areaH) / 2
+  elseif cursorY == "bottom" then
+    local areaH = group.layoutAreaH or virtualH
+    cursorY = virtualH - areaH
+  end
+
+  for n = 1, #group do
+    local bt = group[n]
+
+    if bt.visible ~= false then
+      visibleCount = visibleCount + 1
+
+      if group.layoutDirection == "horizontal" then
+        totalSize = totalSize + (group.layoutW or bt.w)
+      else
+        totalSize = totalSize + (group.layoutH or bt.h)
+      end
+    end
+  end
+
+  if group.layoutSpacingAuto and visibleCount > 1 then
+    local areaSize = group.layoutDirection == "horizontal" and group.layoutAreaW or group.layoutAreaH
+
+    if not areaSize then
+      areaSize = group.layoutDirection == "horizontal" and virtualW or virtualH
+    end
+
+    spacing = math.max(0, (areaSize - totalSize) / (visibleCount - 1))
+  end
+
+  for n = 1, #group do
+    local bt = group[n]
+
+    if bt.visible ~= false then
+      bt.x = cursorX
+      bt.y = cursorY
+
+      if group.layoutW then
+        bt.w = group.layoutW
+      end
+
+      if group.layoutH then
+        bt.h = group.layoutH
+      end
+
+      if group.layoutDirection == "horizontal" then
+        cursorX = cursorX + bt.w + spacing
+      else
+        cursorY = cursorY + bt.h + spacing
+      end
+    end
   end
 
   return group
@@ -484,8 +748,11 @@ function button.new(text, x, y, w, h, group, fct)
     disabledColor = { 0.5, 0.5, 0.5, 1 },
     selected = false,
     hovered = false,
+    visualActive = false,
     enabled = true,
     visible = true,
+    textAlign = "center",
+    textPadding = 12,
 
     isSelect = isSelect,
     isSelectable = isSelectable,
@@ -499,6 +766,7 @@ function button.new(text, x, y, w, h, group, fct)
     onClick = onClick,
     setFont = setFont,
     setText = setText,
+    setTextAlign = setTextAlign,
     setVisible = setVisible,
     setEnabled = setEnabled,
   }
@@ -534,19 +802,27 @@ function button.new(text, x, y, w, h, group, fct)
 
   if group then
     if type(group) == "table" then
-      button.addGroupName(group, new)
+      button.insert(group, new)
     elseif type(group) == "string" then
-      button.addGroupName(group, new)
+      button.insert(group, new)
     end
   else
-    button.addGroupName(button.ungrouped, new)
+    button.insert(button.ungrouped, new)
+  end
+
+  if new.group and new.group.applyLayout then
+    new.group:applyLayout()
   end
 
   return new
 end
 
-function button.newGroup(name)
+function button.newGroup(name, layout)
   if button.lst_group[name] then
+    if layout and button.lst_group[name].setLayout then
+      button.lst_group[name]:setLayout(layout)
+    end
+
     return button.lst_group[name]
   end
 
@@ -559,6 +835,13 @@ function button.newGroup(name)
     active = false,
     enabled = true,
     visible = true,
+    autoLayout = false,
+    layoutDirection = "vertical",
+    layoutX = 0,
+    layoutY = 0,
+    layoutW = nil,
+    layoutH = nil,
+    layoutSpacing = 12,
 
     outlineColor = { 0, 1, 0, 1 },
     outlineWidth = 2,
@@ -582,16 +865,25 @@ function button.newGroup(name)
     getVisualCurrent = groupGetVisualCurrent,
     drawFocus = groupDrawFocus,
     handleInput = groupHandleInput,
+    syncHoveredSelection = groupSyncHoveredSelection,
 
     setVisible = groupSetVisible,
     setEnabled = groupSetEnabled,
     setActive = groupSetActive,
+    setLayout = groupSetLayout,
+    layoutVertical = groupLayoutVertical,
+    layoutHorizontal = groupLayoutHorizontal,
+    applyLayout = groupApplyLayout,
   }
+
+  if layout then
+    button.lst_group[name]:setLayout(layout)
+  end
 
   return button.lst_group[name]
 end
 
-function button.addGroupName(groupName, bt)
+function button.insert(groupName, bt)
   local gr = nil
 
   if type(groupName) == "string" then
@@ -619,6 +911,10 @@ function button.addGroupName(groupName, bt)
   bt.id = id
   table.insert(gr, bt)
   bt.group = gr
+
+  if gr.applyLayout then
+    gr:applyLayout()
+  end
 
   return gr
 end
