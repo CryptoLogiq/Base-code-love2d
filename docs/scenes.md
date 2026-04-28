@@ -96,3 +96,7 @@ end
 ```
 
 Cela évite que le focus d’une ancienne page reste actif après un changement de scène.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

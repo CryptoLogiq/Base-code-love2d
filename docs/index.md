@@ -35,19 +35,19 @@ Le moteur ne cherche pas à remplacer LÖVE. Il sert surtout à fournir une base
 
 ## Pages principales
 
-- [[Installation]]
-- [[Quick Start]]
-- [[Architecture du Core]]
-- [[Scènes]]
-- [[Inputs]]
-- [[GUI - Pages, groupes et boutons]]
-- [[GUI - Priorité des périphériques]]
-- [[Options]]
-- [[Settings et sauvegarde]]
-- [[Rendu virtuel et letterbox]]
-- [[Assets et sprites]]
-- [[Recettes]]
-- [[Référence rapide de l'API]]
+- [Installation](installation.html)
+- [Quick Start](quick-start.html)
+- [Architecture du Core](architecture-core.html)
+- [Scènes](scenes.html)
+- [Inputs](inputs.html)
+- [GUI - Pages, groupes et boutons](gui-pages-groupes-boutons.html)
+- [GUI - Priorité des périphériques](gui-priorite-peripheriques.html)
+- [Options](options.html)
+- [Settings et sauvegarde](settings-sauvegarde.html)
+- [Rendu virtuel et letterbox](rendu-virtuel-letterbox.html)
+- [Assets et sprites](assets-sprites.html)
+- [Recettes](recettes.html)
+- [Référence rapide de l'API](api-reference.html)
 
 ## Exemple minimal
 
@@ -70,3 +70,7 @@ end
 
 return menu
 ```
+
+---
+
+[Navigation complète](navigation.html) · [Référence rapide de l'API](api-reference.html)

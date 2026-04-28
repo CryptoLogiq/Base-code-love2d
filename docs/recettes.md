@@ -121,3 +121,7 @@ Core.Gui.setInputModeDelay(0.25)
 ```lua
 local w, h = Core.getDimensions()
 ```
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

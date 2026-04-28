@@ -71,3 +71,7 @@ end
 - Coordonnées stables.
 - Meilleure compatibilité avec plusieurs résolutions.
 - La souris reste cohérente grâce à `Core.toVirtual`.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

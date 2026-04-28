@@ -95,3 +95,7 @@ Core.Options.saveSettings()
 ## Conseil
 
 Garde la persistance dans `Core.Options` / `Core.Settings`, pas dans les scènes. Une scène Options doit afficher et relayer ; elle ne devrait pas contenir la logique de sérialisation.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

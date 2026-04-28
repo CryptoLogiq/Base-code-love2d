@@ -119,3 +119,7 @@ return {
   }
 }
 ```
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

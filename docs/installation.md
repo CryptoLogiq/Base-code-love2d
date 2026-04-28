@@ -100,3 +100,7 @@ test.txt
 .DS_Store
 Thumbs.db
 ```
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

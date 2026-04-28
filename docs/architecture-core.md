@@ -83,3 +83,7 @@ if Core.Input.pressed("validate") then
 ```
 
 Comme ça, le clavier, la souris et la manette partagent la même logique de gameplay.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

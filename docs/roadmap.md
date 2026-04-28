@@ -37,3 +37,7 @@ simple à lire
 simple à modifier
 simple à supprimer si un projet n’en a pas besoin
 ```
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)
