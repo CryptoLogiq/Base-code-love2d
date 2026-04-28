@@ -40,11 +40,10 @@ La documentation complète est disponible ici :
 - [Settings et sauvegarde](https://cryptologiq.github.io/Base-code-love2d/settings-sauvegarde.html)
 - [Rendu virtuel et letterbox](https://cryptologiq.github.io/Base-code-love2d/rendu-virtuel-letterbox.html)
 - [Assets et sprites](https://cryptologiq.github.io/Base-code-love2d/assets-sprites.html)
-- [Recettes](https://cryptologiq.github.io/Base-code-love2d/recettes.html)
+- [GUI : boutons](https://cryptologiq.github.io/Base-code-love2d/gui-boutons.html)
 - [Conventions](https://cryptologiq.github.io/Base-code-love2d/conventions.html)
 - [Référence rapide de l’API](https://cryptologiq.github.io/Base-code-love2d/api-reference.html)
 - [Roadmap](https://cryptologiq.github.io/Base-code-love2d/roadmap.html)
-- [Publier avec GitHub Pages](https://cryptologiq.github.io/Base-code-love2d/publier-github-pages.html)
 
 ---
 
