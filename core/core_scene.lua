@@ -4,6 +4,14 @@ local lst_Scenes = {}
 
 local current = nil
 
+local function resolveScene(sceneOrName)
+  if type(sceneOrName) == "string" then
+    return corescene.GetScene(sceneOrName, false)
+  end
+
+  return sceneOrName
+end
+
 function corescene.GetScene(name, new)
   if not name then return print('Scene Name is required for create a new scene --> Core.Scene.New("SceneName")') end
   --
@@ -30,9 +38,17 @@ function corescene.New(name)
     return scn
   end
   --
-  local new = {name=name, loaded=false}
-  if #lst_Scenes <= 0 then corescene.SetScene(new) end
+  local new = {name=name, loaded=false, entered=false}
+
+  -- Important : on ne lance pas SetScene ici.
+  -- La scène vient tout juste d'être créée, ses méthodes load/enter/update/draw
+  -- ne sont pas encore déclarées par le fichier scene_xxx.lua.
   table.insert(lst_Scenes, new)
+
+  if not current then
+    current = new
+  end
+
   if corescene.debug then
     print("scene created : "..new.name)
   end
@@ -40,7 +56,9 @@ function corescene.New(name)
 end
 --
 
-function corescene.SetScene(scene)
+function corescene.SetScene(sceneOrName)
+  local scene = resolveScene(sceneOrName)
+
   if not scene then
     print('Scene variable is required for set a current Scene --> Core.Scene.SetScene("MySceneTable")')
     return
@@ -48,8 +66,16 @@ function corescene.SetScene(scene)
 
   local previous = current
 
+  -- Cas du premier lancement : current pointe déjà vers la première scène,
+  -- mais elle n'a jamais reçu enter(). On ne considère donc pas ça comme
+  -- une vraie transition depuis elle-même.
+  if previous == scene and not scene.entered then
+    previous = nil
+  end
+
   if previous and previous ~= scene and previous.leave then
     previous.leave(scene)
+    previous.entered = false
   end
 
   current = scene
@@ -58,8 +84,9 @@ function corescene.SetScene(scene)
     corescene.load(scene)
   end
 
-  if scene.enter then
+  if scene.enter and not scene.entered then
     scene.enter(previous)
+    scene.entered = true
   end
 
   if corescene.debug then
@@ -68,25 +95,31 @@ function corescene.SetScene(scene)
 end
 --
 
-function corescene.load(scene)
+function corescene.load(sceneOrName)
+  local scene = resolveScene(sceneOrName)
+
+  if scene then
+    if scene.load and not scene.loaded then
+      scene.load()
+      scene.loaded = true
+
+      if corescene.debug then
+        print("Scene loaded : "..scene.name)
+      end
+    end
+
+    return scene
+  end
+
   if not current then
     current = lst_Scenes[1]
   end
-  --
-  if current or scene then
-    --
-    if scene then
-      scene.load()
-      scene.loaded = true
-    else
-      current.load()
-      current.loaded = true
-    end
-    if corescene.debug then
-      print("Scene loaded : "..current.name)
-    end
-    --
+
+  if current then
+    corescene.SetScene(current)
   end
+
+  return current
 end
 --
 
@@ -123,7 +156,6 @@ function corescene.keypressed(k, s, isrepeat)
   end
 end
 --
-
 
 function corescene.keyreleased(k, s)
   if current and current.keyreleased then
