@@ -7,8 +7,12 @@ menu.page = Core.Gui.Page.new("MenuPage")
 nav.group = Core.Gui.button.newGroup("Menu")
 menu.page:addGroup("main", nav.group)
 
-nav.main = Core.Gui.button.new("Play", 150, 200, 500, 50, nav.group, function(self)
+nav.play = Core.Gui.button.new("Play", 150, 200, 500, 50, nav.group, function(self)
   Core.Scene.SetScene(Game)
+end)
+
+nav.options = Core.Gui.button.new("Options", 150, 350, 500, 50, nav.group, function(self)
+  Core.Scene.SetScene(Options)
 end)
 
 nav.quit = Core.Gui.button.new("Quit", 150, 500, 500, 50, nav.group, function(self)
@@ -16,10 +20,17 @@ nav.quit = Core.Gui.button.new("Quit", 150, 500, 500, 50, nav.group, function(se
 end)
 
 function menu.load()
-  menu.page:show()
   nav.group:load()
   nav.group:selectIndex(1)
+end
+
+function menu.enter(previousScene)
+  menu.page:show()
   menu.page:setActiveGroup("main")
+end
+
+function menu.leave(nextScene)
+  menu.page:hide()
 end
 
 function menu.update(dt)

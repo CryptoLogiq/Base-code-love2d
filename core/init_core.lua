@@ -12,6 +12,7 @@ Core = require(f.."manager")
 --#########################
 Core.Input = require(f.."input")
 Core.Gui = require(f.."gui")
+Core.Options = require(f.."options")
 Core.Timer = require(f.."timer")
 Core.Mouse = require(f.."mouse")
 Core.Scene = require(f.."scene")

@@ -41,19 +41,29 @@ end
 --
 
 function corescene.SetScene(scene)
-  if scene then
-    current = scene
-    if scene.load then
-      if not scene.loaded then
-        corescene.load(scene)
-      end
-    end
-    
-    if corescene.debug then
-      print("Scene set to : "..scene.name)
-    end
-  else
+  if not scene then
     print('Scene variable is required for set a current Scene --> Core.Scene.SetScene("MySceneTable")')
+    return
+  end
+
+  local previous = current
+
+  if previous and previous ~= scene and previous.leave then
+    previous.leave(scene)
+  end
+
+  current = scene
+
+  if scene.load and not scene.loaded then
+    corescene.load(scene)
+  end
+
+  if scene.enter then
+    scene.enter(previous)
+  end
+
+  if corescene.debug then
+    print("Scene set to : " .. scene.name)
   end
 end
 --
@@ -110,6 +120,56 @@ end
 function corescene.keypressed(k, s, isrepeat)
   if current and current.keypressed then
     current.keypressed(k, s, isrepeat)
+  end
+end
+--
+
+
+function corescene.keyreleased(k, s)
+  if current and current.keyreleased then
+    current.keyreleased(k, s)
+  end
+end
+--
+
+function corescene.mousereleased(x, y, button, istouch, presses)
+  if current and current.mousereleased then
+    current.mousereleased(x, y, button, istouch, presses)
+  end
+end
+--
+
+function corescene.gamepadpressed(joystick, button)
+  if current and current.gamepadpressed then
+    current.gamepadpressed(joystick, button)
+  end
+end
+--
+
+function corescene.gamepadreleased(joystick, button)
+  if current and current.gamepadreleased then
+    current.gamepadreleased(joystick, button)
+  end
+end
+--
+
+function corescene.gamepadaxis(joystick, axis, value)
+  if current and current.gamepadaxis then
+    current.gamepadaxis(joystick, axis, value)
+  end
+end
+--
+
+function corescene.joystickadded(joystick)
+  if current and current.joystickadded then
+    current.joystickadded(joystick)
+  end
+end
+--
+
+function corescene.joystickremoved(joystick)
+  if current and current.joystickremoved then
+    current.joystickremoved(joystick)
   end
 end
 --
