@@ -1,21 +1,13 @@
 # Mini Engine LÖVE2D
 
-Bienvenue dans le wiki du mini-engine.
+Bienvenue dans la documentation du mini-engine.
 
 L’objectif du moteur est de garder un esprit **LÖVE2D-like** : simple, direct, lisible, basé sur des callbacks, avec une petite couche `Core` qui évite de répéter la même plomberie dans chaque projet.
 
 ```lua
-function love.load()
-  Core.load()
-end
+require("init")
 
-function love.update(dt)
-  Core.update(dt)
-end
-
-function love.draw()
-  Core.draw()
-end
+Core.run()
 ```
 
 Le moteur ne cherche pas à remplacer LÖVE. Il sert surtout à fournir une base réutilisable pour :

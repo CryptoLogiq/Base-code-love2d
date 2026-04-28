@@ -28,4 +28,3 @@
 - [Conventions](conventions.html)
 - [Référence rapide de l'API](api-reference.html)
 - [Roadmap](roadmap.html)
-- [Publier avec GitHub Pages](publier-github-pages.html)

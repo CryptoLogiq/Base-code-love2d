@@ -18,21 +18,15 @@ Core
 
 ## Cycle principal
 
-`main.lua` délègue à `Core` :
+`main.lua` délègue à `Core` avec un point d’entrée minimal :
 
 ```lua
-function love.load()
-  Core.load()
-end
+require("init")
 
-function love.update(dt)
-  Core.update(dt)
-end
-
-function love.draw()
-  Core.draw()
-end
+Core.run()
 ```
+
+`Core.run()` installe les callbacks LÖVE et les relaie vers les modules du moteur.
 
 `Core.update(dt)` suit cet ordre :
 

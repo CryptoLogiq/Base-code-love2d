@@ -42,37 +42,15 @@ require("core/init_core")
 require("scenes/init_scenes")
 ```
 
-Dans `main.lua`, tu gardes seulement les callbacks LÖVE qui relaient vers `Core` :
+Dans `main.lua`, tu peux laisser le moteur enregistrer les callbacks LÖVE automatiquement :
 
 ```lua
 require("init")
 
-function love.load()
-  Core.load()
-end
-
-function love.update(dt)
-  Core.update(dt)
-end
-
-function love.draw()
-  Core.draw()
-end
-
-function love.keypressed(key, scancode, isrepeat)
-  Core.keypressed(key, scancode, isrepeat)
-end
-
-function love.mousepressed(x, y, button, istouch, presses)
-  Core.mousepressed(x, y, button, istouch, presses)
-end
-
-function love.gamepadpressed(joystick, button)
-  Core.gamepadpressed(joystick, button)
-end
+Core.run()
 ```
 
-Tu peux relayer aussi `keyreleased`, `mousereleased`, `mousemoved`, `gamepadaxis`, `joystickadded` et `joystickremoved`.
+`Core.run()` relie les callbacks principaux de LÖVE au moteur : chargement, update, draw, clavier, souris, manette, joystick et fenêtre.
 
 ## Lancement
 

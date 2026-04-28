@@ -2,7 +2,7 @@
 
 Les options peuvent être sauvegardées dans un fichier Lua via `love.filesystem`.
 
-Par défaut, le fichier est chargé par `Core.load()` via :
+Par défaut, les réglages sont chargés au démarrage du moteur via :
 
 ```lua
 Core.Options.loadSettings()

@@ -3,6 +3,7 @@
 ## Core
 
 ```lua
+Core.run()
 Core.load()
 Core.update(dt)
 Core.draw()
@@ -204,7 +205,6 @@ t:stop()
 t:restart()
 ```
 
-Note : dans la version actuelle, `Timer` utilise encore `speed = 60`. À refactoriser plus tard si tu veux un timer strictement en secondes.
 
 ---
 
