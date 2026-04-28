@@ -38,7 +38,7 @@ Le moteur ne cherche pas à remplacer LÖVE. Il sert surtout à fournir une base
 - [Settings et sauvegarde](settings-sauvegarde.html)
 - [Rendu virtuel et letterbox](rendu-virtuel-letterbox.html)
 - [Assets et sprites](assets-sprites.html)
-- [Recettes](recettes.html)
+- [GUI - Boutons](gui-boutons.html)
 - [Référence rapide de l'API](api-reference.html)
 
 ## Exemple minimal

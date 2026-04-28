@@ -24,7 +24,7 @@
 
 ## Pratique
 
-- [Recettes](recettes.html)
+- [GUI - Boutons](gui-boutons.html)
 - [Conventions](conventions.html)
 - [Référence rapide de l'API](api-reference.html)
 - [Roadmap](roadmap.html)
