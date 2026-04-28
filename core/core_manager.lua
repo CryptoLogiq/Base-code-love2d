@@ -1,5 +1,127 @@
 local Core = {}
 
+-- =========================================================
+-- LOVE CALLBACK BINDING
+-- =========================================================
+-- Core.run() keeps main.lua minimal by wiring LÖVE callbacks
+-- to the Core manager. It must be called once after require("init").
+function Core.run()
+  if Core.__running then
+    return false
+  end
+
+  if not love then
+    print("[Core.run] LÖVE is not available. Core callbacks were not registered.")
+    return false
+  end
+
+  Core.__running = true
+
+  function love.load(...)
+    if Core.load then
+      return Core.load(...)
+    end
+  end
+
+  function love.update(dt)
+    if Core.update then
+      return Core.update(dt)
+    end
+  end
+
+  function love.draw()
+    if Core.draw then
+      return Core.draw()
+    end
+  end
+
+  function love.keypressed(key, scancode, isrepeat)
+    if Core.keypressed then
+      return Core.keypressed(key, scancode, isrepeat)
+    end
+  end
+
+  function love.keyreleased(key, scancode)
+    if Core.keyreleased then
+      return Core.keyreleased(key, scancode)
+    end
+  end
+
+  function love.textinput(text)
+    if Core.textinput then
+      return Core.textinput(text)
+    end
+  end
+
+  function love.mousepressed(x, y, button, istouch, presses)
+    if Core.mousepressed then
+      return Core.mousepressed(x, y, button, istouch, presses)
+    end
+  end
+
+  function love.mousereleased(x, y, button, istouch, presses)
+    if Core.mousereleased then
+      return Core.mousereleased(x, y, button, istouch, presses)
+    end
+  end
+
+  function love.mousemoved(x, y, dx, dy, istouch)
+    if Core.mousemoved then
+      return Core.mousemoved(x, y, dx, dy, istouch)
+    end
+  end
+
+  function love.wheelmoved(x, y)
+    if Core.wheelmoved then
+      return Core.wheelmoved(x, y)
+    end
+  end
+
+  function love.gamepadpressed(joystick, button)
+    if Core.gamepadpressed then
+      return Core.gamepadpressed(joystick, button)
+    end
+  end
+
+  function love.gamepadreleased(joystick, button)
+    if Core.gamepadreleased then
+      return Core.gamepadreleased(joystick, button)
+    end
+  end
+
+  function love.gamepadaxis(joystick, axis, value)
+    if Core.gamepadaxis then
+      return Core.gamepadaxis(joystick, axis, value)
+    end
+  end
+
+  function love.joystickadded(joystick)
+    if Core.joystickadded then
+      return Core.joystickadded(joystick)
+    end
+  end
+
+  function love.joystickremoved(joystick)
+    if Core.joystickremoved then
+      return Core.joystickremoved(joystick)
+    end
+  end
+
+  function love.resize(w, h)
+    if Core.resize then
+      return Core.resize(w, h)
+    end
+  end
+
+  function love.focus(focused)
+    if Core.focus then
+      return Core.focus(focused)
+    end
+  end
+
+  return true
+end
+
 local warnedDrawColors = {}
 
 local function isWhiteColor(r, g, b, a)
@@ -323,6 +445,44 @@ function Core.joystickremoved(joystick)
 
   if Core.Scene.joystickremoved then
     Core.Scene.joystickremoved(joystick)
+  end
+end
+
+function Core.textinput(text)
+  if Core.Input and Core.Input.textinput then
+    Core.Input.textinput(text)
+  end
+
+  if Core.Scene and Core.Scene.textinput then
+    Core.Scene.textinput(text)
+  end
+end
+
+function Core.wheelmoved(x, y)
+  if Core.Gui and Core.Gui.setInputMode then
+    Core.Gui.setInputMode("mouse", true)
+  end
+
+  if Core.Mouse and Core.Mouse.wheelmoved then
+    Core.Mouse.wheelmoved(x, y)
+  end
+
+  if Core.Scene and Core.Scene.wheelmoved then
+    Core.Scene.wheelmoved(x, y)
+  end
+end
+
+function Core.resize(w, h)
+  Core.updateRenderScale()
+
+  if Core.Scene and Core.Scene.resize then
+    Core.Scene.resize(w, h)
+  end
+end
+
+function Core.focus(focused)
+  if Core.Scene and Core.Scene.focus then
+    Core.Scene.focus(focused)
   end
 end
 
