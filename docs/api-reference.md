@@ -205,3 +205,7 @@ t:restart()
 ```
 
 Note : dans la version actuelle, `Timer` utilise encore `speed = 60`. À refactoriser plus tard si tu veux un timer strictement en secondes.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

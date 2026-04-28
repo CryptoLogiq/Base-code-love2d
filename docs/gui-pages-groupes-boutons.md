@@ -180,3 +180,7 @@ group.outlineWidth = 2
 group.outlinePadding = 4
 group.outlineVisible = true
 ```
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

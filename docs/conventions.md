@@ -78,3 +78,7 @@ Core.Scene.set(Game)
 ```
 
 Évite de mélanger avec les anciens noms de style `New` ou `SetScene` si tu veux garder une API homogène.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

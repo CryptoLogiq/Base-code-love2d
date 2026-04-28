@@ -78,3 +78,7 @@ page:draw()
 ```
 
 Le moteur s’occupe de décider quel bouton est `visualActive`.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

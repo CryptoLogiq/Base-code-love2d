@@ -210,3 +210,7 @@ Core.Options.isDropdownOpen()
 Core.Options.getPage()
 Core.Options.getGroup()
 ```
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

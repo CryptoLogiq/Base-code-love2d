@@ -112,3 +112,7 @@ Core.Input.setDeadzone(0.25)
 ## Règle importante
 
 `pressed` et `released` ne sont valides que pendant une frame. C’est pourquoi `Core.update(dt)` appelle `Core.Input.clearFrame()` seulement après `Core.Scene.update(dt)`.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)

@@ -108,3 +108,7 @@ Options = require(f .. "options")
 - Clavier : haut / bas / entrée / échap.
 - Manette : d-pad / stick / A / B.
 - Le focus UI est géré automatiquement par `Core.Gui`.
+
+---
+
+[← Accueil](index.html) · [Navigation complète](navigation.html)
