@@ -2,6 +2,10 @@ local Core = {}
 
 function Core.load()
     Core.Input.load()
+
+    if Core.Gui and Core.Gui.load then
+        Core.Gui.load()
+    end
     
     if Core.Scene.load then
         Core.Scene.load()
@@ -10,6 +14,10 @@ end
 
 function Core.update(dt)
     Core.Input.update(dt)
+
+    if Core.Gui and Core.Gui.update then
+        Core.Gui.update(dt)
+    end
     
     if Core.Mouse.update then
         Core.Mouse.update(dt)
@@ -23,6 +31,10 @@ function Core.update(dt)
 end
 
 function Core.draw()
+    if Core.Gui and Core.Gui.draw then
+        Core.Gui.draw()
+    end
+
     if Core.Scene.draw then
         Core.Scene.draw()
     end
