@@ -46,3 +46,4 @@ function Scene.mousepressed(x, y, button)
 end
 
 return Scene
+```
